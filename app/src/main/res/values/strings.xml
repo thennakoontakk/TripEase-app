@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TripEase</string>
+    <string name="welcome_message">Plan your perfect trip with ease</string>
+    <string name="start_planning">Start Planning</string>
+</resources>

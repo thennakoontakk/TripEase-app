@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "947840921063",
+    "project_id": "tripease-app",
+    "storage_bucket": "tripease-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:947840921063:android:44473d91859faaca136142",
+        "android_client_info": {
+          "package_name": "com.example.tripease"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB601mPKYc_kG2AZnIU-PhPK_lRvLcUN10"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
