@@ -43,3 +43,23 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Android ###
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.log
+
+### Large Files & Memory Dumps ###
+*.hprof
+java_pid*.hprof
+*.dump
+*.prof
+
+### Firebase ###
+google-services.json
