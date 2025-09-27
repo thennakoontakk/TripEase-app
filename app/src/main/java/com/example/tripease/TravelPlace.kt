@@ -11,7 +11,8 @@ data class TravelPlace(
     val imageUrl: String? = null,
     var distance: Double = 0.0,
     val address: String? = null,
-    val website: String? = null
+    val website: String? = null,
+    var isFavorite: Boolean = false
 )
 
 data class OpenTripMapResponse(

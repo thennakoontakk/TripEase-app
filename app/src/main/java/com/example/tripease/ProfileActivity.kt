@@ -170,6 +170,7 @@ class ProfileActivity : AppCompatActivity() {
                 }
                 R.id.nav_map -> {
                     startActivity(Intent(this, MapActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_itinerary -> {

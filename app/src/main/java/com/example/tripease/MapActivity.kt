@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -31,6 +33,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -44,15 +47,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     
     // UI Components
     private lateinit var toolbar: MaterialToolbar
-    private lateinit var cardTravelPlace: MaterialCardView
     private lateinit var progressBar: ProgressBar
-    private lateinit var ivPlaceImage: ImageView
-    private lateinit var tvPlaceName: TextView
-    private lateinit var tvPlaceCategory: TextView
-    private lateinit var ratingBar: RatingBar
-    private lateinit var tvRating: TextView
-    private lateinit var tvDistance: TextView
-    private lateinit var btnOpenInMap: MaterialButton
+    private lateinit var recyclerViewPlaces: RecyclerView
+    private lateinit var placesAdapter: PlaceAdapter
+    private lateinit var bottomNavigation: BottomNavigationView
     
     private var currentLocation: LatLng? = null
     private var selectedPlace: TravelPlace? = null
@@ -92,20 +90,37 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     
     private fun initViews() {
         toolbar = findViewById(R.id.toolbar)
-        cardTravelPlace = findViewById(R.id.cardTravelPlace)
         progressBar = findViewById(R.id.progressBar)
-        ivPlaceImage = findViewById(R.id.ivPlaceImage)
-        tvPlaceName = findViewById(R.id.tvPlaceName)
-        tvPlaceCategory = findViewById(R.id.tvPlaceCategory)
-        ratingBar = findViewById(R.id.ratingBar)
-        tvRating = findViewById(R.id.tvRating)
-        tvDistance = findViewById(R.id.tvDistance)
-        btnOpenInMap = findViewById(R.id.btnOpenInMap)
+        recyclerViewPlaces = findViewById(R.id.recyclerViewPlaces)
+        bottomNavigation = findViewById(R.id.bottomNavigation)
         
-        btnOpenInMap.setOnClickListener {
-            selectedPlace?.let { place ->
-                openInGoogleMaps(place.latitude, place.longitude, place.name)
+        setupRecyclerView()
+        setupBottomNavigation()
+    }
+    
+    private fun setupRecyclerView() {
+        placesAdapter = PlaceAdapter(
+            places = travelPlaces,
+            onPlaceClick = { place ->
+                selectedPlace = place
+                showPlaceCard(place)
+                // Move camera to selected place
+                val latLng = LatLng(place.latitude, place.longitude)
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+            },
+            onFavoriteClick = { place ->
+                // Handle favorite toggle
+                place.isFavorite = !place.isFavorite
+                placesAdapter.notifyDataSetChanged()
+                Toast.makeText(this, 
+                    if (place.isFavorite) "Added to favorites" else "Removed from favorites", 
+                    Toast.LENGTH_SHORT).show()
             }
+        )
+        
+        recyclerViewPlaces.apply {
+            layoutManager = LinearLayoutManager(this@MapActivity)
+            adapter = placesAdapter
         }
     }
     
@@ -314,6 +329,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                 addMarkerToMap(travelPlace)
             }
         }
+        
+        // Update RecyclerView with new places
+        placesAdapter.notifyDataSetChanged()
     }
     
     private fun loadSamplePlaces() {
@@ -419,26 +437,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
     
     private fun showPlaceCard(place: TravelPlace) {
-        tvPlaceName.text = place.name
-        tvPlaceCategory.text = place.category
-        ratingBar.rating = place.rating.toFloat()
-        tvRating.text = String.format("%.1f", place.rating)
-        
-        val distanceText = if (place.distance < 1.0) {
-            "${(place.distance * 1000).toInt()}\nm"
-        } else {
-            "${String.format("%.1f", place.distance)}\nkm"
+        // Since we're using RecyclerView now, we can scroll to the selected place
+        // or highlight it in the list instead of showing a separate card
+        val position = travelPlaces.indexOf(place)
+        if (position != -1) {
+            recyclerViewPlaces.scrollToPosition(position)
         }
-        tvDistance.text = distanceText
-        
-        // Load placeholder image (you can enhance this with actual images from API)
-        Glide.with(this)
-            .load(place.imageUrl)
-            .placeholder(R.drawable.ic_place_placeholder)
-            .error(R.drawable.ic_place_placeholder)
-            .into(ivPlaceImage)
-        
-        cardTravelPlace.visibility = View.VISIBLE
     }
     
     private fun getCategoryFromKinds(kinds: String): String {
@@ -480,6 +484,33 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
             val webUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=$latitude,$longitude")
             val webIntent = Intent(Intent.ACTION_VIEW, webUri)
             startActivity(webIntent)
+        }
+    }
+    
+    private fun setupBottomNavigation() {
+        bottomNavigation.selectedItemId = R.id.nav_map
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_map -> {
+                    // Already on map activity
+                    true
+                }
+                R.id.nav_itinerary -> {
+                    Toast.makeText(this, "Itinerary - Coming Soon", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.nav_profile -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    finish()
+                    true
+                }
+                else -> false
+            }
         }
     }
 }

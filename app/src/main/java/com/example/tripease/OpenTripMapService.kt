@@ -26,6 +26,6 @@ interface OpenTripMapService {
     
     companion object {
         const val BASE_URL = "https://api.opentripmap.com/"
-        const val API_KEY = "5ae2e3f221c38a28845f05b6c4b8b8b8b8b8b8b8" // Replace with your actual API key
+        const val API_KEY = "5ae2e3f221c38a28845f05b6ef0f64406d9b42ea418d699ef0d9360f" // Replace with your actual API key
     }
 }
